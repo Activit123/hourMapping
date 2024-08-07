@@ -5,6 +5,9 @@ import com.mihai.Java_2024.config.JwtService;
 import com.mihai.Java_2024.features.categoryFeature.dto.Categorydto;
 import com.mihai.Java_2024.features.categoryFeature.entity.Category;
 import com.mihai.Java_2024.features.categoryFeature.repository.CategoryRepository;
+import com.mihai.Java_2024.features.rateFeature.repository.RateRepository;
+import com.mihai.Java_2024.features.revenueFeature.entity.Revenue;
+import com.mihai.Java_2024.features.revenueFeature.repository.RevenueRepository;
 import com.mihai.Java_2024.utils.Role;
 import lombok.RequiredArgsConstructor;
 import org.apache.xmlbeans.impl.xb.xsdschema.Attribute;
@@ -22,6 +25,10 @@ public class CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private RevenueRepository revenueRepository;
+    @Autowired
+    private RateRepository rateRepository;
     private final ContextHolderService contextHolderService;
     public List<Category> getAllCategories() {
 
@@ -67,6 +74,17 @@ public class CategoryService {
     public ResponseEntity<Void> deleteCategory(int id) {
         Optional<Category> category = categoryRepository.findById(id);
         if (category.isPresent()) {
+           Optional<List<Revenue>> revenues = revenueRepository.findRevenuesByCategoryId(id);
+            if(revenues.isPresent()){
+                for(Revenue r:revenues.get()){
+                    r.setTitle(r.getCategory().getCategoryName());
+                    r.setCategory(null);
+                    revenueRepository.save(r);
+                }
+            }
+            if(rateRepository.findByCategoryId(id).isPresent()){
+                rateRepository.deleteById(rateRepository.findByCategoryId(id).get().getId());
+            }
             categoryRepository.deleteById(id);
             return ResponseEntity.noContent().build();
         } else {

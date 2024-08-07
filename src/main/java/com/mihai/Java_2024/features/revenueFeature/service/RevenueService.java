@@ -1,11 +1,14 @@
 package com.mihai.Java_2024.features.revenueFeature.service;
 
 import com.mihai.Java_2024.config.ContextHolderService;
+import com.mihai.Java_2024.features.categoryFeature.entity.Category;
 import com.mihai.Java_2024.features.categoryFeature.repository.CategoryRepository;
+import com.mihai.Java_2024.features.revenueFeature.dto.ChangeRevenue;
 import com.mihai.Java_2024.features.revenueFeature.dto.RevenueRequest;
 import com.mihai.Java_2024.features.revenueFeature.dto.RevenueResponse;
 import com.mihai.Java_2024.features.revenueFeature.entity.Revenue;
 import com.mihai.Java_2024.features.revenueFeature.repository.RevenueRepository;
+import com.mihai.Java_2024.features.userFeature.entity.User;
 import com.mihai.Java_2024.features.userFeature.repository.UserRepository;
 import com.mihai.Java_2024.utils.Role;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +34,17 @@ public class RevenueService {
     public ResponseEntity<?> getAllRevenues() {
         List<Revenue> revenues = revenueRepository.findAll();
         List<RevenueResponse> revenueResponses = new ArrayList<>();
+        User user = contextHolderService.getCurrentUser();
         for(Revenue r:revenues){
+            if(r.getUser().getId()!=user.getId()){
+                continue;
+            }
             RevenueResponse revenueResponse = new RevenueResponse();
-            revenueResponse.setCategoryName(r.getCategory().getCategoryName());
+            if(r.getCategory() == null){
+                revenueResponse.setCategoryName(r.getTitle());
+            }else {
+                revenueResponse.setCategoryName(r.getCategory().getCategoryName());
+            }
             revenueResponse.setCurrency(r.getCurrency());
             revenueResponse.setHoursWorked(r.getHoursWorked());
             revenueResponse.setCurrDay(r.getCurrDay());
@@ -53,7 +64,7 @@ public class RevenueService {
 
     public ResponseEntity<?> createRevenue(RevenueRequest revenue) {
         Revenue revenue1 = new Revenue();
-        revenue1.setTitle("");
+       // revenue1.setTitle("");
         revenue1.setHoursWorked(revenue.getHoursWorked());
         revenue1.setCurrDay(revenue.getCurrDay());
         revenue1.setCurrency(revenue.getCurrency());
@@ -64,24 +75,27 @@ public class RevenueService {
         revenue1.setUser(contextHolderService.getCurrentUser());
     //    revenue1.setUser(userRepository.findById(revenue.getUser_id()).get());
         revenue1.setCategory(categoryRepository.findById(revenue.getCategory_id()).get());
+        revenue1.setTitle(categoryRepository.findById(revenue.getCategory_id()).get().getCategoryName());
        Revenue saveRevenue =  revenueRepository.save(revenue1);
         return ResponseEntity.ok(saveRevenue);
     }
 
-    public ResponseEntity<Revenue> updateRevenue(int id, Revenue revenueDetails) {
+    public ResponseEntity<?> updateRevenue(int id, ChangeRevenue revenueDetails) {
         Optional<Revenue> revenue = revenueRepository.findById(id);
+      //  return ResponseEntity.ok(revenue.get());
         if (revenue.isPresent()) {
             Revenue existingRevenue = revenue.get();
-            existingRevenue.setTitle(revenueDetails.getTitle());
-            existingRevenue.setHoursWorked(revenueDetails.getHoursWorked());
-            existingRevenue.setCurrDay(revenueDetails.getCurrDay());
-            existingRevenue.setCurrency(revenueDetails.getCurrency());
-            existingRevenue.setCategory(revenueDetails.getCategory());
-            existingRevenue.setUser(revenueDetails.getUser());
+            Optional <List<Category>> categories = categoryRepository.findCategoriesByCategoryName(revenueDetails.getNewRevenueName());
+          //  return ResponseEntity.ok(categories.get());
+            if(!categories.get().isEmpty()){
+                existingRevenue.setCategory(categories.get().getFirst());
+            }else {
+                existingRevenue.setTitle(revenueDetails.getNewRevenueName());
+            }
             Revenue updatedRevenue = revenueRepository.save(existingRevenue);
             return ResponseEntity.ok(updatedRevenue);
         } else {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Not foun");
         }
     }
 

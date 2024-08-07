@@ -61,6 +61,10 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(req -> req
                         .requestMatchers("POST", "/api/login").permitAll()
                         .requestMatchers("POST", "/api/users").permitAll()
+                        .requestMatchers("POST","/api/rates/**").hasAnyAuthority(Constants.ROLE_NORMAL_USER)
+                        .requestMatchers("GET","/api/rates/**").hasAnyAuthority(Constants.ROLE_NORMAL_USER)
+                        .requestMatchers("PUT","/api/rates/**").hasAnyAuthority(Constants.ROLE_NORMAL_USER)
+                        .requestMatchers("DELETE","/api/rates/**").hasAnyAuthority(Constants.ROLE_NORMAL_USER)
                         .requestMatchers("GET", "/api/revenues/**").hasAnyAuthority(Constants.ROLE_NORMAL_USER)
                         .requestMatchers("POST", "/api/revenues/**").hasAnyAuthority(Constants.ROLE_NORMAL_USER)
                         .requestMatchers("GET", "/api/category/**").hasAnyAuthority(Constants.ROLE_NORMAL_USER)

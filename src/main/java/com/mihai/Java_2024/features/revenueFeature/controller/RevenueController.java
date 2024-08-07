@@ -1,6 +1,8 @@
 package com.mihai.Java_2024.features.revenueFeature.controller;
 
+import com.mihai.Java_2024.features.revenueFeature.dto.ChangeRevenue;
 import com.mihai.Java_2024.features.revenueFeature.dto.RevenueRequest;
+import com.mihai.Java_2024.features.revenueFeature.dto.RevenueResponse;
 import com.mihai.Java_2024.features.revenueFeature.entity.Revenue;
 import com.mihai.Java_2024.features.revenueFeature.service.RevenueService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +34,7 @@ public class RevenueController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Revenue> updateRevenue(@PathVariable int id, @RequestBody Revenue revenueDetails) {
+    public ResponseEntity<?> updateRevenue(@PathVariable int id, @RequestBody ChangeRevenue revenueDetails) {
         return revenueService.updateRevenue(id, revenueDetails);
     }
 
