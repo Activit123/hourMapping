@@ -1,4 +1,4 @@
 FROM amazoncorretto:21-alpine-jdk
-COPY out/artifacts/Internship_2024_java_green_jar/Internship-2024-java-green.jar Internship-2024-java-green.jar
+COPY build/libs/Internship-2024-java-green-0.0.1-SNAPSHOT.jar Internship-2024-java-green-0.0.1-SNAPSHOT.jar
 EXPOSE 8080
-ENTRYPOINT [ "java", "-jar", "Internship-2024-java-green.jar" ]
+ENTRYPOINT [ "java", "-jar", "Internship-2024-java-green-0.0.1-SNAPSHOT.jar" ]
