@@ -14,10 +14,8 @@ services:
       - postgres-data:/var/lib/postgresql/data # Persist data
 
   app:
-    image: api
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: spitamihai/api:v2.0
+    container_name: SpringBootApp
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/auctions
       SPRING_DATASOURCE_USERNAME: postgres

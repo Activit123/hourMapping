@@ -8,4 +8,5 @@ import java.util.Optional;
 
 public interface RevenueRepository extends JpaRepository<Revenue,Integer> {
     Optional<List<Revenue>> findRevenuesByCategoryId(Integer category_id);
+    List<Revenue> findByUserId(Integer user_id);
 }
