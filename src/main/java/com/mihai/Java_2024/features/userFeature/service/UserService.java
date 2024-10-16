@@ -2,6 +2,9 @@ package com.mihai.Java_2024.features.userFeature.service;
 
 import com.mihai.Java_2024.exceptions.UserAlreadyExistsException;
 import com.mihai.Java_2024.exceptions.UserNotFoundException;
+import com.mihai.Java_2024.features.resetEmailFeature.dto.PasswordDto;
+import com.mihai.Java_2024.features.resetEmailFeature.entity.RecoveryToken;
+import com.mihai.Java_2024.features.resetEmailFeature.repository.RecoveryTokenRepository;
 import com.mihai.Java_2024.features.userFeature.dto.UserEmailDto;
 import com.mihai.Java_2024.features.userFeature.dto.UserWithCompanyDto;
 import com.mihai.Java_2024.features.userFeature.entity.User;
@@ -36,6 +39,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RecoveryTokenRepository recoveryTokenRepository;
     private final S3Service s3Service;
     private final ContextHolderService contextHolderService;
     public ResponseEntity<?> createUser(UserWithCompanyDto juridicUserDto) {
@@ -104,9 +108,22 @@ public class UserService {
         return convertToDto(userRepository.findUserByEmail(email));
     }
 
+    public RecoveryToken createPasswordRecoveryTokenForUser(UserEmailDto userEmailDto, final String token, Instant expiration) throws UserNotFoundException {
+        if (userEmailDto == null) {
+            throw new UserNotFoundException("User not found");
+        }
+        final RecoveryToken recoveryToken = new RecoveryToken(userEmailDto.getEmail(), token, expiration.getEpochSecond(), convertToEntity(userEmailDto));
+        log.info(recoveryToken.toString());
+        recoveryTokenRepository.save(recoveryToken);
+        return recoveryToken;
+    }
 
-
-
+    public void changeUserPassword(PasswordDto passwordDto) {
+        RecoveryToken recoveryToken = recoveryTokenRepository.findByToken(passwordDto.getToken());
+        User user = userRepository.findUserByEmail(recoveryToken.getUserEmail());
+        user.setPassword(new BCryptPasswordEncoder().encode((passwordDto.getNewPassword())));
+        userRepository.save(user);
+    }
 
 
     private UserEmailDto convertToDto(User user) throws UserNotFoundException {
@@ -124,11 +141,20 @@ public class UserService {
     }
 
     public String constructPasswordResetEmailBody(String origin, String token){
-        String body = "Here is your password recovery link: \n\n";
-        String url = origin + "/api/user/recover?token=" + token;
+        String body = "Here is your password recovery code: \n\n";
+        String url = token + "\n\n Now go back to the application and paste it in the required field!";
         return body + url;
     }
 
+    public RecoveryToken generateRecoveryToken(UserEmailDto userEmailDto) throws UserNotFoundException {
+        String token = UUID.randomUUID().toString();
+
+        log.info(token);
+
+        Instant currentTime = Instant.now();
+        long SECONDS_IN_A_DAY = 86400L;
+        return createPasswordRecoveryTokenForUser(userEmailDto, token, currentTime.plusSeconds(SECONDS_IN_A_DAY));
+    }
 
     public ResponseEntity<String> redirect() {
         //redirect

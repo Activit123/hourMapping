@@ -10,45 +10,37 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 @Service
 public class StatisticsService {
 
     @Autowired
     private StatisticsRepository statisticsRepository;
+
     @Autowired
     private ContextHolderService contextHolderService;
+
     public List<CategoryBalanceDTO> getEstimatedBalanceByCategory() {
-        // Fetch raw data from the repository
         User user = contextHolderService.getCurrentUser();
         List<Object[]> rawData = statisticsRepository.findRawDataForCategoryBalance(user.getId());
 
         Map<String, Double> balanceMap = new HashMap<>();
+        Map<String, Double> hourMap = new HashMap<>();
 
-        // Iterate over the raw data and calculate the estimated balance
         for (Object[] row : rawData) {
             String categoryName = (String) row[0];
-            String hoursWorkedStr = (String) row[1];
-            Double rate = (Double) row[2]; // Can be null
+            double hoursWorked = (double) row[1];
+            Double rate = (Double) row[2];
 
-            // Skip categories without a rate
-            if (rate == null) {
-                continue;
+            if (rate != null) {
+                double estimatedBalance = hoursWorked * rate;
+                balanceMap.merge(categoryName, estimatedBalance, Double::sum);
             }
 
-            // Convert hoursWorked from String to double
-            double hoursWorked = Double.parseDouble(hoursWorkedStr);
-
-            // Calculate the estimated balance for this row
-            double estimatedBalance = hoursWorked * rate;
-
-            // Accumulate the balance per category
-            balanceMap.merge(categoryName, estimatedBalance, Double::sum);
+            hourMap.merge(categoryName, hoursWorked, Double::sum);
         }
 
-        // Convert the map entries to DTOs
-        return balanceMap.entrySet().stream()
-                .map(entry -> new CategoryBalanceDTO(entry.getKey(), entry.getValue()))
+        return hourMap.entrySet().stream()
+                .map(entry -> new CategoryBalanceDTO(entry.getKey(), balanceMap.getOrDefault(entry.getKey(), 0.0), entry.getValue()))
                 .toList();
     }
 }

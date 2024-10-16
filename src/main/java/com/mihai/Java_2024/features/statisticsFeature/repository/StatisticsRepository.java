@@ -11,10 +11,14 @@ import java.util.List;
 @Repository
 public interface StatisticsRepository extends CrudRepository<Category, Integer> {
 
-    @Query("SELECT c.categoryName, rv.hoursWorked, r.rate " +
+    @Query("SELECT c.categoryName, " +
+            "COALESCE(SUM(CAST(rv.hoursWorked AS double)), 0) AS totalHours, " +
+            "COALESCE(r.rate, 0) AS rate " +
             "FROM Category c " +
+            "LEFT JOIN Revenue rv ON c.id = rv.category.id AND rv.user.id = :userId " +
             "LEFT JOIN Rate r ON c.id = r.category.id " +
-            "JOIN Revenue rv ON c.id = rv.category.id " +
-            "WHERE rv.user.id = :userId")
+            "WHERE rv.user.id = :userId " +
+            "GROUP BY c.categoryName, r.rate")
     List<Object[]> findRawDataForCategoryBalance(@Param("userId") Integer userId);
+
 }

@@ -41,6 +41,7 @@ dependencies {
 	implementation 'org.apache.commons:commons-collections4:4.4'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
 	implementation 'org.apache.poi:poi-ooxml:5.2.3' // Adjust the version as needed
 	implementation 'org.apache.poi:poi:5.2.3'
 	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2'
