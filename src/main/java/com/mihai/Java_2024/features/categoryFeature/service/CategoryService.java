@@ -39,8 +39,8 @@ public class CategoryService {
         return categories.get();
     }
 
-    public ResponseEntity<Category> getCategoryById(int id) {
-        Optional<Category> category = categoryRepository.findById(id);
+   /* public ResponseEntity<Category> getCategoryById(int id) {
+        Optional<Category> category = categoryRepository.getById(id);
         return category.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -72,7 +72,7 @@ public class CategoryService {
     }
 
     public ResponseEntity<Void> deleteCategory(int id) {
-        Optional<Category> category = categoryRepository.findById(id);
+        Optional<Category> category = categoryRepository.getById(id);
         if (category.isPresent()) {
            Optional<List<Revenue>> revenues = revenueRepository.findRevenuesByCategoryId(id);
             if(revenues.isPresent()){
@@ -90,5 +90,5 @@ public class CategoryService {
         } else {
             return ResponseEntity.notFound().build();
         }
-    }
+    }*/
 }

@@ -8,6 +8,7 @@ import com.mihai.Java_2024.features.puzzleFeature.repository.PuzzleRepository;
 import com.mihai.Java_2024.features.puzzleFeature.repository.StartPuzzleRepository;
 import com.mihai.Java_2024.features.userFeature.entity.User;
 import com.mihai.Java_2024.utils.Role;
+import com.mihai.Java_2024.utils.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,11 @@ import software.amazon.awssdk.core.SdkGlobalTime;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class StartPuzzleService {
@@ -37,7 +42,6 @@ public class StartPuzzleService {
         startPuzzle.setPuzzle(puzzle);
         return startPuzzle;
     }
-
     // Main logic to create StartPuzzle
     public ResponseEntity<?> createStartPuzzle(StartPuzzleDto dto) {
         // Check user role
@@ -51,13 +55,20 @@ public class StartPuzzleService {
 
         User currentUser = contextHolderService.getCurrentUser();
 
-        // Check if the StartPuzzle already exists for the user and puzzle
+        // Check if there's an unfinished StartPuzzle (no finish time) for the user and puzzle
         Optional<StartPuzzle> existingStartPuzzle = startPuzzleRepository.findByUserAndPuzzle(currentUser, puzzle);
-        if (existingStartPuzzle.isPresent()) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Puzzle already started by this user.");
+
+        if (existingStartPuzzle.isPresent() && existingStartPuzzle.get().getFinishTime() == null) {
+            // If an existing puzzle is found and has no finish time set, return conflict
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("You already have an unfinished puzzle.");
+        }
+        if (existingStartPuzzle.isPresent() && existingStartPuzzle.get().getFinishTime() != null) {
+            // If an existing puzzle is found and has no finish time set, return conflict
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Puzzle finished but no more puzzles available.");
         }
 
-        // Create new StartPuzzle if not already started
+
+        // Create new StartPuzzle if no unfinished one exists
         StartPuzzle startPuzzle = this.toEntity(dto, puzzle);
         startPuzzle.setUser(currentUser);
 
@@ -68,6 +79,20 @@ public class StartPuzzleService {
         }
 
         return ResponseEntity.ok(savedPuzzle);
+    }
+
+    public List<String> getUserEmailsAndCurrentLevel() {
+        List<Object[]> results = startPuzzleRepository.findUsersWithCurrentPuzzle();
+
+        // Use LinkedHashSet to maintain order and filter out duplicates
+        Set<String> uniqueResults = new LinkedHashSet<>(
+                results.stream()
+                        .map(result -> "Email: " + result[0] + ", Current Level: " + result[1])
+                        .collect(Collectors.toList())
+        );
+
+        // Convert the set back to a list
+        return uniqueResults.stream().toList();
     }
     // Find started puzzle for the user and update finish_time
     public ResponseEntity<?> finishAndStartNewPuzzle(Puzzle solvedPuzzle) {
@@ -105,5 +130,15 @@ public class StartPuzzleService {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No started puzzle found for this user.");
         }
+    }
+    public ResponseEntity<?> getCurrentLevel(){
+        User user = contextHolderService.getCurrentUser();
+        if(user.getRole() == Role.NORMAL_USER){
+            StartPuzzle startPuzzle = (StartPuzzle) startPuzzleRepository.findAllByUser(user);
+            if(startPuzzle!=null ){
+                return ResponseEntity.ok(startPuzzle.getPuzzle().getId());
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("?????");
     }
 }

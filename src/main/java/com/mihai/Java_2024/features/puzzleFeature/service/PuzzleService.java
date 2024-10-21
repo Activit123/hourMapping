@@ -2,6 +2,7 @@ package com.mihai.Java_2024.features.puzzleFeature.service;
 
 import com.mihai.Java_2024.config.ContextHolderService;
 import com.mihai.Java_2024.features.puzzleFeature.dto.PuzzleDTO;
+import com.mihai.Java_2024.features.puzzleFeature.dto.ShowPuzzle;
 import com.mihai.Java_2024.features.puzzleFeature.entity.Puzzle;
 import com.mihai.Java_2024.features.puzzleFeature.repository.PuzzleRepository;
 import com.mihai.Java_2024.features.userFeature.entity.User;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,6 +40,15 @@ public class PuzzleService {
         return dto;
     }
 
+    // Convert Entity to ShowPuzzle DTO
+    public ShowPuzzle toDTO2(Puzzle puzzle) {
+        ShowPuzzle dto = new ShowPuzzle();
+        dto.setPuzzleId(puzzle.getId()); // Assuming Puzzle entity has puzzleId
+        dto.setPname(puzzle.getPname());
+        return dto;
+    }
+
+
     // Convert DTO to Entity
     public Puzzle fromDTO(PuzzleDTO dto) {
         Puzzle puzzle = new Puzzle();
@@ -47,12 +58,19 @@ public class PuzzleService {
     }
 
     // Get all puzzles
-    public List<PuzzleDTO> getAllPuzzles() {
-        return puzzleRepository.findAll()
+    public List<ShowPuzzle> getAllPuzzles() {
+        // First collect the stream to a list
+        List<ShowPuzzle> puzzles = puzzleRepository.findAll()
                 .stream()
-                .map(this::toDTO)
+                .map(this::toDTO2)
                 .collect(Collectors.toList());
+
+        // Then reverse the list
+        Collections.reverse(puzzles);
+
+        return puzzles;
     }
+
 
     // Get puzzle by ID
     public Optional<PuzzleDTO> getPuzzleById(int id) {

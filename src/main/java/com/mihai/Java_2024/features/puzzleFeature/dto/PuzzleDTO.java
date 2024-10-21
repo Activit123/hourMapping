@@ -1,5 +1,6 @@
 package com.mihai.Java_2024.features.puzzleFeature.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,5 +8,6 @@ import lombok.Setter;
 @Setter
 public class PuzzleDTO {
     private String pname;
+    @JsonIgnore
     private String solution;
 }

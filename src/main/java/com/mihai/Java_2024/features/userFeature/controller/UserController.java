@@ -36,7 +36,10 @@ public class UserController {
     public ResponseEntity<?> editUser(@RequestBody UserWithCompanyDto userWithCompanyDto) throws IOException {
         return userService.editUser(userWithCompanyDto);
     }
-
+    @GetMapping("/getRole")
+    public ResponseEntity<?> getRole(){
+        return userService.getRole();
+    }
 
 
 }

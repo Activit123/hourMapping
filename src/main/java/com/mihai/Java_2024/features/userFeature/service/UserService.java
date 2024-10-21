@@ -139,7 +139,10 @@ public class UserService {
     private User convertToEntity(UserEmailDto userEmailDto) {
         return userRepository.findUserByEmail(userEmailDto.getEmail());
     }
-
+    public ResponseEntity<?> getRole(){
+        User user = contextHolderService.getCurrentUser();
+        return ResponseEntity.ok(user.getRole());
+    }
     public String constructPasswordResetEmailBody(String origin, String token){
         String body = "Here is your password recovery code: \n\n";
         String url = token + "\n\n Now go back to the application and paste it in the required field!";

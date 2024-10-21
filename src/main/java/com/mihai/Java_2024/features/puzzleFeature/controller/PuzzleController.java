@@ -1,6 +1,7 @@
 package com.mihai.Java_2024.features.puzzleFeature.controller;
 
 import com.mihai.Java_2024.features.puzzleFeature.dto.PuzzleDTO;
+import com.mihai.Java_2024.features.puzzleFeature.dto.ShowPuzzle;
 import com.mihai.Java_2024.features.puzzleFeature.entity.Puzzle;
 import com.mihai.Java_2024.features.puzzleFeature.service.PuzzleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/puzzles")
+@RequestMapping("/api/puzzles")
 public class PuzzleController {
 
     @Autowired
@@ -33,8 +34,8 @@ public class PuzzleController {
 
     // Get all puzzles
     @GetMapping
-    public ResponseEntity<List<PuzzleDTO>> getAllPuzzles() {
-        List<PuzzleDTO> puzzles = puzzleService.getAllPuzzles();
+    public ResponseEntity<List<ShowPuzzle>> getAllPuzzles() {
+        List<ShowPuzzle> puzzles = puzzleService.getAllPuzzles();
         return ResponseEntity.ok(puzzles);
     }
 
