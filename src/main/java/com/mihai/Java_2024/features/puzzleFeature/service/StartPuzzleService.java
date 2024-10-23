@@ -134,8 +134,8 @@ public class StartPuzzleService {
     public ResponseEntity<?> getCurrentLevel(){
         User user = contextHolderService.getCurrentUser();
         if(user.getRole() == Role.NORMAL_USER){
-            StartPuzzle startPuzzle = (StartPuzzle) startPuzzleRepository.findAllByUser(user);
-            if(startPuzzle!=null ){
+            StartPuzzle startPuzzle = startPuzzleRepository.findByUserAndFinishTimeIsNull(user).get();
+            if(startPuzzle!=null){
                 return ResponseEntity.ok(startPuzzle.getPuzzle().getId());
             }
         }
