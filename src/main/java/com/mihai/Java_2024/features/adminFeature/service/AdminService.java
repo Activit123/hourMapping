@@ -2,6 +2,7 @@ package com.mihai.Java_2024.features.adminFeature.service;
 
 import com.mihai.Java_2024.config.ContextHolderService;
 import com.mihai.Java_2024.features.adminFeature.dto.UserDTO;
+import com.mihai.Java_2024.features.adminFeature.dto.UserLevelDTO;
 import com.mihai.Java_2024.features.puzzleFeature.entity.StartPuzzle;
 import com.mihai.Java_2024.features.userFeature.entity.User;
 import com.mihai.Java_2024.features.userFeature.repository.UserRepository;
@@ -17,7 +18,18 @@ public class AdminService {
     private final UserRepository userRepository;
     private final StartPuzzleRepository startPuzzleRepository;
     private final ContextHolderService contextHolderService;
+    public List<UserLevelDTO> getPlayerLevels(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        List<StartPuzzle> completedPuzzles = startPuzzleRepository.findAllByUser(user).stream()
+                .filter(puzzle -> puzzle.getFinishTime() != null) // Filtrăm doar puzzle-urile terminate
+                .collect(Collectors.toList());
+
+        return completedPuzzles.stream()
+                .map(puzzle -> new UserLevelDTO(puzzle.getPuzzle().getId(), puzzle.getFinishTime().toString()))
+                .collect(Collectors.toList());
+    }
     public List<UserDTO> getAllPlayers() {
 
         User currentUser = contextHolderService.getCurrentUser();
