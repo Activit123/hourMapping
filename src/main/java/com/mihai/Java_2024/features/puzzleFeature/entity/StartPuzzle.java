@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "start_puzzles")
@@ -30,4 +32,17 @@ public class StartPuzzle {
 
     @Column(name = "finish_time")
     private LocalDateTime finishTime;
+
+    // Initialize startTime in Bucharest timezone
+    @PrePersist
+    public void prePersist() {
+        if (this.startTime == null) {
+            this.startTime = ZonedDateTime.now(ZoneId.of("Europe/Bucharest")).toLocalDateTime();
+        }
+    }
+
+    // Set finishTime in Bucharest timezone when puzzle finishes
+    public void completePuzzle() {
+        this.finishTime = ZonedDateTime.now(ZoneId.of("Europe/Bucharest")).toLocalDateTime();
+    }
 }
