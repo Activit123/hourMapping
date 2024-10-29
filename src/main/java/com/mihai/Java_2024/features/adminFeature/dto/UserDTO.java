@@ -12,6 +12,6 @@ import java.time.LocalDateTime;
 public class UserDTO {
     private Integer id;
     private String email;
-    private LocalDateTime totalTimeSpent; // Adăugat pentru timpul total petrecut
+    private String totalTimeSpent; // Adăugat pentru timpul total petrecut
     private Integer currentLevel; // Numele puzzle-ului/nivelului curent
 }

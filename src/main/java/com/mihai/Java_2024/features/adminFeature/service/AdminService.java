@@ -8,10 +8,6 @@ import com.mihai.Java_2024.features.userFeature.repository.UserRepository;
 import com.mihai.Java_2024.features.puzzleFeature.repository.StartPuzzleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,10 +48,12 @@ public class AdminService {
 
 
                     // Determinăm ID-ul puzzle-ului curent
-                    Integer currentPuzzleId = currentPuzzle != null ? currentPuzzle.getPuzzle().getId() : null;
+                    Integer currentPuzzleId = currentPuzzle != null ? currentPuzzle.getPuzzle().getId() : 0;
 
-                    // Returnăm DTO cu timpul total (în ore) și ID-ul puzzle-ului curent
-                    return new UserDTO(user.getId(), user.getUsername(),lastPuzzle.getFinishTime(), currentPuzzleId);
+                    if(lastPuzzle==null)
+                        return new UserDTO(user.getId(), user.getUsername(),"0", currentPuzzleId);
+                    else
+                       return new UserDTO(user.getId(), user.getUsername(),lastPuzzle.getFinishTime().toString(), currentPuzzleId);
                 })
                 .collect(Collectors.toList());
     }
